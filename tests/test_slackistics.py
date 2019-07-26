@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `slacktastic` package."""
+"""Tests for `slackistics` package."""
 
 import pytest
+
+
+from slacktastic import slackistics
+
 
 @pytest.fixture
 def response():
