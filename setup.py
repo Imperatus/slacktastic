@@ -17,6 +17,7 @@ requirements = [
 
 setup_requirements = [
     'pytest-runner',
+    'pygments'  # For RST rendering in IDE
 ]
 
 test_requirements = [
