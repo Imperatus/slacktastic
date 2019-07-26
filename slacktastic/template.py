@@ -103,10 +103,12 @@ class PieChart(Attachment):
     def __init__(
             self,
             title: str,
-            data: Dict
+            data: Dict,
+            color: Optional[str]
     ):
         image_url = self._compute_image_url(data)
-        super().__init__(title, image_url=image_url, thumb_url=image_url)
+        super().__init__(title, image_url=image_url, thumb_url=image_url,
+                         color=color)
 
     @staticmethod
     def _compute_image_url(data):
