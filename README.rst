@@ -27,7 +27,8 @@ Usage
 -----
 .. code-block:: python
 
-    from slackistics.client.slack import SlackClient
+    from slacktastic.client import SlackClient
+    from slacktastic.template import Attachment, PieChart, Message
 
     client = SlackClient(webhook_url='YOUR WEBHOOK URL')
     attachment = Attachment(

@@ -1,5 +1,5 @@
-from slacktastic.client.slack import SlackClient
-from slacktastic.templates.message import Message, Attachment, Field, PieChart
+from slacktastic.client import SlackClient
+from slacktastic.template import Message, PieChart
 
 client = SlackClient(
     webhook_url='https://hooks.slack.com/services/'
