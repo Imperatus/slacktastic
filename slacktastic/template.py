@@ -51,7 +51,6 @@ class Attachment(Base):
             self.fields = list()
 
     def to_slack(self):
-        print(self.image_url)
         return {
             'title': self.title,
             'title_link': self.title_link,
