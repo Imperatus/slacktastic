@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Top-level package for slacktastic."""
+"""Top-level package for slackistics."""
 
 __author__ = """Jurgen Buisman"""
 __email__ = 'jurgen@labela.nl'

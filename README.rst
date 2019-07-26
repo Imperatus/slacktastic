@@ -1,12 +1,12 @@
 ===========
-Slacktastic
+slackistics
 ===========
 
 Package to send Statistics over a Slack Incoming Webhook
 
 
 * Free software: MIT license
-* Documentation: https://slacktastic.readthedocs.io.
+* Documentation: https://slackistics.readthedocs.io.
 
 
 Features
@@ -27,7 +27,7 @@ Usage
 -----
 .. code-block:: python
 
-    from slacktastic.client.slack import SlackClient
+    from slackistics.client.slack import SlackClient
 
     client = SlackClient(webhook_url='YOUR WEBHOOK URL')
     attachment = Attachment(
