@@ -25,22 +25,22 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 Usage
 -----
-.. code-block::python
+.. code-block:: python
 
     from slackistics.client.slack import SlackClient
-    client = SlackClient(webhook_url='YOUR WEBHOOK URL')
 
+    client = SlackClient(webhook_url='YOUR WEBHOOK URL')
     attachment = Attachment(
         title='Cool block title',
         title_link='https://labela.nl',
         text='Some awesome text')
 
     chart = PieChart(
-        title="Test data",
-        data={
+            title="Test data",
+            data={
                 'labels': ['Alpha', 'Omega'],
-                'values': [22, 55]
-            }
+                 'values': [22, 55]
+             }
         )
 
     message = Message(
