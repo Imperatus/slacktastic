@@ -1,0 +1,2 @@
+class BadArgumentsError(Exception):
+    pass
