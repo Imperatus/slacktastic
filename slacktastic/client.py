@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from slacktastic.templates.message import Message
+from slacktastic.template import Message
 
 
 class SlackClient:
