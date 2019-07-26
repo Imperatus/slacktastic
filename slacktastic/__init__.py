@@ -4,4 +4,4 @@
 
 __author__ = """Jurgen Buisman"""
 __email__ = 'jurgen@labela.nl'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
