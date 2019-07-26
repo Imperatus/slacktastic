@@ -5,3 +5,6 @@
 __author__ = """Jurgen Buisman"""
 __email__ = 'jurgen@labela.nl'
 __version__ = '0.1.0'
+
+import slacktastic.client
+import slacktastic.templates
