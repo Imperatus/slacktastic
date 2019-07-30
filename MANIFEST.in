@@ -9,5 +9,6 @@ recursive-include client *
 recursive-include templates *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
+recursive-exclude * __main__.py
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
