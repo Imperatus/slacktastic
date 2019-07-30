@@ -6,7 +6,6 @@ Package to send Statistics over a Slack Incoming Webhook
 
 
 * Free software: MIT license
-* Documentation: https://slackistics.readthedocs.io.
 
 
 Features
