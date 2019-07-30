@@ -1,2 +1,2 @@
-class BadArgumentsError(Exception):
+class ValidationError(Exception):
     pass
