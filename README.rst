@@ -38,11 +38,17 @@ Usage
 
     chart = PieChart(
             title="Test data",
-            data={
-                'labels': ['Alpha', 'Omega'],
-                 'values': [22, 55]
-             }
+            labels=['Ride', 'Reservation'],
+            values=[22, 55]
         )
+
+    another_chart = BarChart(
+            "Test data", labels=['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+            data={
+                'Test 1': [1, 2, 4, 8, 16],
+                'Test 2': [7, 3, 45, 1, 12],
+            }
+    )
 
     message = Message(
         text="I want to show you some *magic* :sparkles:",
