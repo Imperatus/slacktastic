@@ -87,6 +87,7 @@ class Field:
 
 class Diagram(Attachment):
     diagram_type = None
+    BASE_URL = "https://quickchart.io/chart"
 
     def __init__(
             self,
@@ -107,20 +108,28 @@ class Diagram(Attachment):
     def _validate_data(self, *args, **kwargs):
         pass
 
-    @staticmethod
-    def _compute_image_url(data: Dict, diagram_type: str):
-        base_url = "https://quickchart.io/chart"
+    def _compute_image_url(self, data: Dict, diagram_type: str):
         escaped = quote(f"{{type: '{diagram_type}',data: {data}}}")
         parameters = f"?c={escaped}"
-        return base_url + parameters
+        return self.BASE_URL + parameters
 
 
-class BarChart(Diagram):
+class Graph(Diagram):
+    """
+    For all diagrams with the following data payload:
+        {
+            "labels": List,
+            "datasets": [
+                {"label": str, "data": List}
+            ]
+        }
+    """
     def __init__(
             self,
             title: str,
             labels: List,
             data: Dict,
+            graph_type: str,
             color: Optional[str] = None
     ):
         self._validate_data(labels, data)
@@ -132,7 +141,10 @@ class BarChart(Diagram):
             formatted_data['datasets'].append({'data': values, 'label': label})
 
         super().__init__(
-            title=title, data=formatted_data, diagram_type='bar', color=color)
+            title=title,
+            data=formatted_data,
+            diagram_type=graph_type,
+            color=color)
 
     def _validate_data(
             self,
@@ -147,14 +159,59 @@ class BarChart(Diagram):
                 )
 
 
-class PieChart(Diagram):
+class BarChart(Graph):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            data: Dict,
+            color: Optional[str] = None
+    ):
+        super().__init__(title, labels, data, 'bar', color)
+
+
+class LineChart(Graph):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            data: Dict,
+            color: Optional[str] = None
+    ):
+        super().__init__(title, labels, data, 'line', color)
+
+
+class RadarChart(Graph):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            data: Dict,
+            color: Optional[str] = None
+    ):
+        super().__init__(title, labels, data, 'radar', color)
+
+
+class FoodChart(Diagram):
+    """
+    Wrapper for Pie and Donut charts with the following payload:
+        {
+            "labels": List,
+            "datasets": [
+                {"data": List}
+            ]
+        }
+    """
+
     def __init__(
             self,
             title: str,
             labels: List,
             values: List,
+            graph_type: str,
             color: Optional[str] = None
     ):
+        self._validate_data(labels, values)
         data = {
             'labels': labels,
             'datasets': [
@@ -162,7 +219,7 @@ class PieChart(Diagram):
             ]
         }
         super().__init__(
-            title=title, data=data, diagram_type='pie', color=color)
+            title=title, data=data, diagram_type=graph_type, color=color)
 
     def _validate_data(
             self,
@@ -171,6 +228,40 @@ class PieChart(Diagram):
     ):
         if len(labels) != len(values):
             raise ValidationError('Labels and values not the same size')
+
+
+class PieChart(FoodChart):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            values: List,
+            color: Optional[str] = None
+    ):
+        super().__init__(
+            title=title,
+            labels=labels,
+            values=values,
+            graph_type='pie',
+            color=color
+        )
+
+
+class DonutChart(FoodChart):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            values: List,
+            color: Optional[str] = None
+    ):
+        super().__init__(
+            title=title,
+            labels=labels,
+            values=values,
+            graph_type='doughnut',
+            color=color
+        )
 
 
 class Message(Base):
