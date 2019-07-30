@@ -1,10 +1,9 @@
 from abc import abstractmethod
 from datetime import datetime
 from urllib.parse import quote
-import json
 
 from typing import List, Optional, Union, Dict
-from slacktastic.exceptions import BadArgumentsError
+from slacktastic.exceptions import ValidationError
 
 
 class Base:
@@ -30,7 +29,7 @@ class Attachment(Base):
             date_time: Optional[datetime] = None
     ):
         if all(not value for value in [title, text, fields]):
-            raise BadArgumentsError(
+            raise ValidationError(
                 'Either `title`, `text` or `fields` required')
         self.title = title
         self.title_link = title_link
@@ -87,38 +86,91 @@ class Field:
 
 
 class Diagram(Attachment):
-    def __init__(
-            self,
-            title: str,
-            data: Dict
-    ):
-        self.data = data
-        super().__init__(title=title)
+    diagram_type = None
 
-    def to_slack(self):
-        pass
-
-
-class PieChart(Attachment):
     def __init__(
             self,
             title: str,
             data: Dict,
-            color: Optional[str]
+            diagram_type: str,
+            color: Optional[str] = None
     ):
-        image_url = self._compute_image_url(data)
-        super().__init__(title, image_url=image_url, thumb_url=image_url,
-                         color=color)
+        url = self._compute_image_url(data, diagram_type)
+        super().__init__(
+            title=title,
+            color=color,
+            image_url=url,
+            thumb_url=url,
+        )
+
+    @abstractmethod
+    def _validate_data(self, *args, **kwargs):
+        pass
 
     @staticmethod
-    def _compute_image_url(data):
+    def _compute_image_url(data: Dict, diagram_type: str):
         base_url = "https://quickchart.io/chart"
-        labels = data.get('labels', [])
-        values = data.get('values', [])
-        escaped = quote(f"{{type: 'pie',data: {{labels: {labels},"
-                        f"datasets: [{{data: {values}}}]}}}}")
+        escaped = quote(f"{{type: '{diagram_type}',data: {data}}}")
         parameters = f"?c={escaped}"
         return base_url + parameters
+
+
+class BarChart(Diagram):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            data: Dict,
+            color: Optional[str] = None
+    ):
+        self._validate_data(labels, data)
+        formatted_data = {
+            'labels': labels,
+            'datasets': []
+        }
+        for label, values in data.items():
+            formatted_data['datasets'].append({'data': values, 'label': label})
+
+        super().__init__(
+            title=title, data=formatted_data, diagram_type='bar', color=color)
+
+    def _validate_data(
+            self,
+            labels: List[str],
+            data: Dict[str, List[Union[int, float]]]
+    ):
+        label_len = len(labels)
+        for key, values in data.items():
+            if label_len != len(values):
+                raise ValidationError(
+                    f'Labels and values not the same size for "{key}"'
+                )
+
+
+class PieChart(Diagram):
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            values: List,
+            color: Optional[str] = None
+    ):
+        data = {
+            'labels': labels,
+            'datasets': [
+                {'data': values}
+            ]
+        }
+        super().__init__(
+            title=title, data=data, diagram_type='pie', color=color)
+
+    def _validate_data(
+            self,
+            labels: List[str],
+            values: List[Union[int, float]]
+    ):
+        if len(labels) != len(values):
+            raise ValidationError('Labels and values not the same size')
 
 
 class Message(Base):
@@ -128,7 +180,7 @@ class Message(Base):
             attachments: List[Optional[Attachment]] = None
     ):
         if all(not value for value in [text, attachments]):
-            raise BadArgumentsError('Either `text` or `attachments` required')
+            raise ValidationError('Either `text` or `attachments` required')
 
         self.text = text
         if isinstance(attachments, list):
