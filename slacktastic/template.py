@@ -1,9 +1,16 @@
 from abc import abstractmethod
 from datetime import datetime
+import json
+from math import ceil
+from typing import List, Optional, Union, Dict
 from urllib.parse import quote
 
-from typing import List, Optional, Union, Dict
 from slacktastic.exceptions import ValidationError
+from slacktastic.constants import (
+    BASE_URL,
+    BACKGROUND_COLOR_DEFAULTS,
+    FOOD_LABEL_OPTIONS
+)
 
 
 class Base:
@@ -87,72 +94,100 @@ class Field:
 
 class Diagram(Attachment):
     diagram_type = None
-    BASE_URL = "https://quickchart.io/chart"
+    options = {}
 
     def __init__(
             self,
             title: str,
             data: Dict,
-            diagram_type: str,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
-        url = self._compute_image_url(data, diagram_type)
+        self.data = data
+
         super().__init__(
             title=title,
             color=color,
-            image_url=url,
-            thumb_url=url,
         )
+
+    def set_options(self, options: Dict):
+        self.options = options
+
+    def to_slack(self):
+        self._set_image_urls()
+        return super().to_slack()
 
     @abstractmethod
     def _validate_data(self, *args, **kwargs):
         pass
 
-    def _compute_image_url(self, data: Dict, diagram_type: str):
-        escaped = quote(f"{{type: '{diagram_type}',data: {data}}}")
-        parameters = f"?c={escaped}"
-        return self.BASE_URL + parameters
+    def _set_image_urls(self):
+        payload = {
+            'type': self.diagram_type,
+            'data': self.data,
+            'options': self.options if self.options else {}
+        }
+
+        parameters = f"?c={quote(json.dumps(payload))}"
+        url = BASE_URL + parameters
+        self.image_url = url
+        self.thumb_url = url
 
 
 class Graph(Diagram):
-    """
-    For all diagrams with the following data payload:
-        {
-            "labels": List,
-            "datasets": [
-                {"label": str, "data": List}
-            ]
-        }
-    """
     def __init__(
             self,
             title: str,
             labels: List,
             data: Dict,
-            graph_type: str,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
-        self._validate_data(labels, data)
-        formatted_data = {
-            'labels': labels,
-            'datasets': []
-        }
-        for label, values in data.items():
-            formatted_data['datasets'].append({'data': values, 'label': label})
+        self.data = data
+        self.labels = labels
+        self._validate_data()
+        self.background_colors = BACKGROUND_COLOR_DEFAULTS
+        self.data = self._format_data(BACKGROUND_COLOR_DEFAULTS)
 
         super().__init__(
             title=title,
-            data=formatted_data,
-            diagram_type=graph_type,
-            color=color)
+            data=self.data,
+            color=color
+        )
 
-    def _validate_data(
-            self,
-            labels: List[str],
-            data: Dict[str, List[Union[int, float]]]
-    ):
-        label_len = len(labels)
-        for key, values in data.items():
+    def set_background_colors(self, colors: List[str]):
+        self.data = self._format_data(colors)
+
+    def _format_data(self, colors: List):
+        formatted_data = {
+            'labels': self.labels,
+            'datasets': []
+        }
+
+        bg_colors = iter(colors)
+        for label, values in self.data.items():
+            try:
+                background = next(bg_colors)
+            except StopIteration:
+                bg_colors = iter(BACKGROUND_COLOR_DEFAULTS)
+                background = next(bg_colors)
+
+            dataset = self._format_dataset(label, values, background)
+            formatted_data['datasets'].append(dataset)
+        return formatted_data
+
+    @staticmethod
+    def _format_dataset(
+            label: str,
+            values: List[Union[int, float]],
+            background: str):
+        return {
+            'label': label,
+            'data': values,
+            'backgroundColor': background,
+        }
+
+    def _validate_data(self):
+        label_len = len(self.labels)
+        for key, values in self.data.items():
             if label_len != len(values):
                 raise ValidationError(
                     f'Labels and values not the same size for "{key}"'
@@ -160,47 +195,48 @@ class Graph(Diagram):
 
 
 class BarChart(Graph):
+    diagram_type = 'bar'
+
     def __init__(
             self,
             title: str,
             labels: List,
             data: Dict,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
-        super().__init__(title, labels, data, 'bar', color)
+        self.data = data
+        super().__init__(title, labels, data, color)
 
 
 class LineChart(Graph):
+    diagram_type = 'line'
+
     def __init__(
             self,
             title: str,
             labels: List,
             data: Dict,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
-        super().__init__(title, labels, data, 'line', color)
+        super().__init__(title, labels, data, color)
 
 
 class RadarChart(Graph):
+    diagram_type = 'radar'
+
     def __init__(
             self,
             title: str,
             labels: List,
             data: Dict,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
-        super().__init__(title, labels, data, 'radar', color)
+        super().__init__(title, labels, data, color)
 
 
 class FoodChart(Diagram):
     """
-    Wrapper for Pie and Donut charts with the following payload:
-        {
-            "labels": List,
-            "datasets": [
-                {"data": List}
-            ]
-        }
+    Wrapper for Pie and Donut charts with special data payload
     """
 
     def __init__(
@@ -208,59 +244,76 @@ class FoodChart(Diagram):
             title: str,
             labels: List,
             values: List,
-            graph_type: str,
             color: Optional[str] = None
     ):
-        self._validate_data(labels, values)
-        data = {
+        self.options = FOOD_LABEL_OPTIONS
+        self.labels = labels
+        self.values = values
+
+        self._validate_data()
+        self.data = {
             'labels': labels,
             'datasets': [
-                {'data': values}
+                {
+                    'data': values,
+                    'backgroundColor': BACKGROUND_COLOR_DEFAULTS
+                }
             ]
         }
-        super().__init__(
-            title=title, data=data, diagram_type=graph_type, color=color)
 
-    def _validate_data(
-            self,
-            labels: List[str],
-            values: List[Union[int, float]]
-    ):
-        if len(labels) != len(values):
+        super().__init__(
+            title=title,
+            data=self.data,
+            color=color,
+        )
+
+    def set_background_colors(self, colors: List[str]):
+        diff = len(self.labels) - len(colors)
+        if diff > 0:  # Append the same list x times until we have enough
+            parts = ceil(diff / len(colors))
+            for _ in range(parts):
+                colors = colors + colors
+
+        self.data['datasets'][0]['backgroundColor'] = colors
+
+    def _validate_data(self):
+        if len(self.labels) != len(self.values):
             raise ValidationError('Labels and values not the same size')
 
 
 class PieChart(FoodChart):
+    diagram_type = 'pie'
+
     def __init__(
             self,
             title: str,
             labels: List,
             values: List,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
         super().__init__(
             title=title,
             labels=labels,
             values=values,
-            graph_type='pie',
             color=color
         )
 
 
 class DonutChart(FoodChart):
+    diagram_type = 'doughnut'
+
     def __init__(
             self,
             title: str,
             labels: List,
             values: List,
-            color: Optional[str] = None
+            color: Optional[str] = None,
     ):
         super().__init__(
             title=title,
             labels=labels,
             values=values,
-            graph_type='doughnut',
-            color=color
+            color=color,
         )
 
 
@@ -283,5 +336,6 @@ class Message(Base):
         return {
             'text': self.text,
             'attachments': [
-                attachment.to_slack() for attachment in self.attachments]
+                attachment.to_slack() for attachment in self.attachments
+            ]
         }

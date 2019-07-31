@@ -64,6 +64,15 @@ Usage
             values=[22, 55]
         )
 
+    # You can now pass custom ChartJS options for all diagrams! See ChartJS docs
+    chart.set_options({
+        title: {
+        display: true,
+        text: 'Cool title',
+        fontColor: 'hotpink',  # For testing purposes only...
+        fontSize: 32,
+    })
+
     another_chart = BarChart(
             "Test data", labels=['Jan', 'Feb', 'Mar', 'Apr', 'May'],
             data={
@@ -72,9 +81,13 @@ Usage
             }
     )
 
+    # Customise the background colors of your data if you don't like our scheme
+    another_chart.set_background_colors([
+        "#000", "#3333", "#666", "#999", "#CCC"
+    ])
+
     message = Message(
         text="I want to show you some *magic* :sparkles:",
         attachments=[attachment, chart]
     )
     client.send_message(message)
-
