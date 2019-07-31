@@ -11,7 +11,26 @@ Package to send Statistics over a Slack Incoming Webhook
 Features
 --------
 
-* TODO
+* Send messages via Slack Incoming Webhook
+* Provides object-based templates for Messages, Attachments and Fields
+* Fine-grained control over Message formatting, and supports mrkdwn
+* Easily generate various charts based on your data. Supported types are:
+    * Bar Chart
+    * Line Chart
+    * Radar Chart
+    * Pie Chart
+    * Donut Chart
+
+
+Roadmap
+-------
+
+* Implement tests
+* Add extensive documentation
+* Add support for more chart types
+* Add templates for most commonly sent messages
+* Extend customizability to override webhook settings
+
 
 Credits
 -------
@@ -20,6 +39,10 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+
+This package makes use of the Quickchart.io_ to draw diagrams.
+
+.. _Quickchart.io: https://quickchart.io
 
 
 Usage
