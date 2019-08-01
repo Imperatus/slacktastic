@@ -21,6 +21,7 @@ Features
     * Pie Chart
     * Outer Pie Chart
     * Donut Chart
+    * Radial Gauge
 
 
 Roadmap
