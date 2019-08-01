@@ -194,6 +194,48 @@ class Graph(Diagram):
                 )
 
 
+class RadialGauge(Diagram):
+    diagram_type = 'radialGauge'
+
+    def __init__(
+            self,
+            title: str,
+            percentage: Union[str, int, float],
+            radial_color: Optional[str] = None,
+            color: Optional[str] = None,
+    ):
+        self._validate_data(percentage)
+        data = self._format_data(percentage, radial_color)
+        super().__init__(title, data, color)
+
+    @staticmethod
+    def _format_data(
+            percentage: Union[int, float, str],
+            radial_color: Optional[str] = None
+    ):
+        return {
+            'datasets': [
+                {
+                    'data': [percentage],
+                    'backgroundColor': radial_color
+                }
+            ]
+        }
+
+    @staticmethod
+    def _validate_data(
+            percentage: Union[str, int, float]
+    ):
+        try:
+            percentage = int(percentage)
+        except ValueError:
+            raise ValidationError('Percentage not a number')
+
+        if not (0 <= percentage <= 100):
+            raise ValidationError(
+                'Invalid percentage: not between 0 and 100')
+
+
 class BarChart(Graph):
     diagram_type = 'bar'
 
