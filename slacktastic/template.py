@@ -299,6 +299,41 @@ class PieChart(FoodChart):
         )
 
 
+class OuterPieChart(FoodChart):
+    diagram_type = 'outlabeledPie'
+
+    def __init__(
+            self,
+            title: str,
+            labels: List,
+            values: List,
+            color: Optional[str] = None,
+    ):
+        super().__init__(
+            title=title,
+            labels=labels,
+            values=values,
+            color=color
+        )
+        self.set_options(
+            {
+                "plugins": {
+                    "legend": False,
+                    "outlabels": {
+                        "text": "%l %p",
+                        "color": "white",
+                        "stretch": 35,
+                        "font": {
+                            "resizable": True,
+                            "minSize": 12,
+                            "maxSize": 18
+                        }
+                    }
+                }
+            }
+        )
+
+
 class DonutChart(FoodChart):
     diagram_type = 'doughnut'
 

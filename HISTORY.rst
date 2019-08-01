@@ -2,6 +2,11 @@
 History
 =======
 
+0.3.1 (2019-08-01)
+------------------
+
+* Added OuterPieChart, the Pie chart with labels on the outside!
+
 0.3.0 (2019-07-31)
 ------------------
 

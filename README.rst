@@ -19,6 +19,7 @@ Features
     * Line Chart
     * Radar Chart
     * Pie Chart
+    * Outer Pie Chart
     * Donut Chart
 
 
@@ -29,11 +30,15 @@ Roadmap
 * Add extensive documentation
 * Add support for more chart types
 * Add templates for most commonly sent messages
-* Extend customizability to override webhook settings
+* Extend customisation to override webhook settings
 
 
 Credits
 -------
+
+Inspiration for this package occurred while trying to send statistics for projects in a uniform way to Slack channels for `Label A`_.
+
+.. _`Label A`: https://labela.nl
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
