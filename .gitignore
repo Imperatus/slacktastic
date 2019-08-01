@@ -106,3 +106,5 @@ ENV/
 
 # Jetbrainz
 .idea/
+
+Makefile
