@@ -7,6 +7,9 @@ Package to send Statistics over a Slack Incoming Webhook
 
 * Free software: MIT license
 
+Support
+-------
+Currently we support Python 3.5+
 
 Features
 --------
